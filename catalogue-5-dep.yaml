@@ -1,0 +1,91 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    name: catalogue-5
+  name: catalogue-5
+  namespace: sock-shop-nr
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      name: catalogue-5
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        name: catalogue-5
+    spec:
+      containers:
+      - env:
+        - name: NEW_RELIC_APP_NAME
+          value: k8s_catalogue-5
+        - name: NEW_RELIC_LICENSE_KEY
+          value: eeb7295ea271868ac1048f0bb4e38cf0FFFFNRAL
+        - name: NEW_RELIC_DISTRIBUTED_TRACING_ENABLED
+          value: "true"
+        - name: NEW_RELIC_DISABLE_VM_SAMPLER
+          value: "true"
+        - name: NEW_RELIC_INFINITE_TRACING_TRACE_OBSERVER_HOST
+          value: 448bdf21-6ae0-48d8-a693-fd11b898ae22.aws-us-west-2.tracing.edge.nr-data.net
+        - name: DB_HOST
+          value: catalogue-db-5
+        - name: RAILS_LOG_TO_STDOUT
+          value: "true"
+        - name: RAILS_MAX_THREADS
+          value: "20"
+        image: azumax/catalogue-5:test
+        imagePullPolicy: Always
+        livenessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /health
+            port: 3000
+            scheme: HTTP
+          initialDelaySeconds: 60
+          periodSeconds: 3
+          successThreshold: 1
+          timeoutSeconds: 300
+        name: catalogue-5
+        ports:
+        - containerPort: 3000
+          protocol: TCP
+        readinessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /health
+            port: 3000
+            scheme: HTTP
+          initialDelaySeconds: 60
+          periodSeconds: 3
+          successThreshold: 1
+          timeoutSeconds: 300
+        resources:
+          limits:
+            cpu: 500m
+            memory: 2Gi
+          requests:
+            cpu: 500m
+            memory: 2Gi
+        securityContext:
+          capabilities:
+            add:
+            - NET_BIND_SERVICE
+            drop:
+            - all
+        terminationMessagePolicy: File
+      dnsPolicy: ClusterFirst
+      nodeSelector:
+        beta.kubernetes.io/os: linux
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
