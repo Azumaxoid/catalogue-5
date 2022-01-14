@@ -19,7 +19,7 @@ class TagSelector
      INNER JOIN tags ON sock_tags.tag_id = tags.tag_id
     GROUP BY tags.name
     EOS
-    result = ActiveRecord::Base.connection.select_all(sql)
+    result = ActiveRecord::Base.connection.select_all(sql).to_a
     return result
   end
 
